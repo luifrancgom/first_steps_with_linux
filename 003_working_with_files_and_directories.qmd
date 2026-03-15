@@ -1,0 +1,158 @@
+---
+title: Working with files and directories
+format:
+  html: 
+    toc: true
+    number-sections: true
+    code-fold: true
+    embed-resources: true
+---
+
+# Get to know the linux files system
+
+The Linux file system organizes everything into a hierarchical structure.
+
+Everything lieves under one starting point: the root directory, written as `/`. From there, the system branches out like a tree, with directories containing files and more directories.
+
+Linux generally follows the Filesystem Hierarchy Standard (FHS)
+
+# Common directories in Linux
+
+## `/` root directory
+
+The root directory sits at the top of the Linux file system hierarchy and contains everything on your system.
+
+## `/bin` essential binaries
+
+This directory traditionally hel essential system executables (also called binaries). Commands like `ls`, `cp`, `mv` and `rm` were store here.
+
+On modern Linux systems, however, `/bin` is usually just a symbolic link to `/usr/bin`, where the actual binaries live.
+
+## `/boot` boot files
+
+This directory contains everything needed to boot your system, including the linux kernel and boot loader files.
+
+## `/dev` device files 
+
+The `/dev` directory contains special files that represent hardware devices such as hard drives and USB devices 
+
+## `/etc` configuration files
+
+This is where most system-wide configuration files live.
+
+## `/home` user home directories
+
+Each user has a persona ldirectory inside `/home`. 
+
+## `/lib` shared libraries
+
+This directory contains shared libraries needed by system binaries.
+
+## `/lost+found` recovered files
+
+After a crash or improper shutdown, the system may recover orphaned files and place them in this directory.
+
+## `/media` mounted removable media
+
+Traditionally, `/media` is where hot-swappable devices such as USB sticks and CDs are automatically mounted.
+
+::: {.callout-note}
+
+Enterprise or server distributions may not use `\media` at all. In those environments, devices are tipycally mounted by the administrator.
+
+## `/mnt` temporary mount point
+
+The `/mnt` directory is reserved for **manual mounts** performed by the system adminstrator.
+
+::: {.callout-note}
+
+System administrators often use `/mnt` when working with additional disks, recovery tasks or mounting network filesystems such as NFS or SMB.
+
+:::
+
+## `/opt` optional software
+
+Third-party software and packages that are not part of the system package manager often get installed here.
+
+## `/proc ` process and system info
+
+This is a virtual file system used to access information about running processes and system resources.
+
+## `/root` root user's home directory
+
+The `/root` directory is the home directory for the root (administrator) user. don't confuse it with `/`, which is the top-level directory for the entire system.
+
+By giving the superuser a dedicated home directory at `/root`, Linux ensures administrative files are stored safely and separated from the system root.
+
+## `/run` runtime information
+
+Contains data about the system that only matters while it is running.
+
+## `/sbin` system binaries
+
+Reserve for system administration tasks.
+
+## `/srv` service data
+
+This directory holds data for system services like web or FTP servers. For example, website files might live in `/srv/www`
+
+## `/tmp tempory files`
+
+Used for storing temporary files created by applications.
+
+## `/usr` user programs and data
+
+This is a large and import directory that contains most of the user-space programs and files. Som important subdirectories include:
+
+- `/usr/bin`: common user commands
+- `/usr/sbin`: system administration commands
+- `/usr/lib`: shared libraries for programs in `/usr/bin` and `/usr/bin`
+- `/usr/lib`: shared libraries for programs in `/usr/bin` and `/usr/sbin`
+- `/usr/share`: shared data such as documentation, icons and localization files
+- `/usr/local`: used for software manually installed by the system adminsitrator, especially when not using a package manager
+
+## `/var` variable data
+
+Contains data that changes often, such a log files, caches and mail spools. Common subdirectories include:
+
+- `/var/log`: system and application log files
+- `/var/mail`: user mailboxes
+- `/var/lib`: state information for services and package managers
+
+# Revisiting Linux file system navigation
+
+## Absolute path vs relative path
+
+### Absolute path
+
+Always points to the same location in the file system, no matter where you are. It starts from the root directory `/`. For example:
+
+```bash
+/etc/hosts
+```
+
+### Relative path
+
+Starts from your current location in the file system (aka current working directory)
+
+## Useful shorcuts for navigating
+
+- `.` current directory
+- `..` parent directory
+- `~` home directory
+- `-` previous directory
+
+# Creating, moving and deleting files
+
+## Creating files with touch
+
+In Linux, the `touch` command is commonly used to create an empty file. It is useful when you need to quickly generate a file without opening an editor. For example:
+
+```bash
+touch users.text
+```
+
+If the file does not exist, `touch` will create it. If it already exists, `touch` will update the file's timestamp to the current data and time without modifying its contents.
+
+## Creating directories with `mkdir`
+

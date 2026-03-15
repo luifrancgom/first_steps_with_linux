@@ -1,0 +1,78 @@
+---
+title: Getting started with linux
+format:
+  html: 
+    toc: true
+    number-sections: true
+    code-fold: true
+    embed-resources: true
+---
+
+# Navigating the file system
+
+## Print working directory
+
+```bash
+pwd
+```
+
+## List directory contents
+
+```bash
+ls
+```
+
+Get more detailide information such as file permissions, file type, sizes, and modification dates:
+
+```bash
+ls -l
+```
+
+::: {.callout-tip}
+
+Whe you run ls, Linux ofter uses colors to help you visually distinguish file types:
+
+- **Directories** are usually shown in blue
+- **Regular files** appear in white
+- **Executable files** such as scripts with execute permissions are often green 
+
+:::
+
+To view hidden files, use:
+
+```bash
+ls -a
+```
+
+To view file sizes in a more readable format (kilobytes, megabytes or gigabytes), detailed information and hidden files:
+
+```bash
+ls -hla
+```
+
+## Change directory
+
+**Where I am going?**
+
+```bash
+cd ~/Documents
+```
+
+To move back to the parent directory (one level up):
+
+```bash
+cd ..
+```
+
+To jump straight to your home directory:
+
+```bash
+cd ~
+```
+
+Creating directories (aka folders)
+
+```bash
+mkdir Projects
+```
+
