@@ -57,8 +57,8 @@ After a crash or improper shutdown, the system may recover orphaned files and pl
 Traditionally, `/media` is where hot-swappable devices such as USB sticks and CDs are automatically mounted.
 
 ::: {.callout-note}
-
 Enterprise or server distributions may not use `\media` at all. In those environments, devices are tipycally mounted by the administrator.
+:::
 
 ## `/mnt` temporary mount point
 
@@ -156,3 +156,313 @@ If the file does not exist, `touch` will create it. If it already exists, `touch
 
 ## Creating directories with `mkdir`
 
+The `mkdir` command is used to create new directories. For example:
+
+```bash
+mkdir first_step_with_linux
+```
+If you need to create multiple nested directories and want to ensure that the parent directories are created if they do not already exist, you can use the option `-p`:
+
+
+```bash
+mkdir -p first_step_with_linux/001_understanding_linux_and_its_value 
+```
+
+## Copying files with cp
+
+The `cp` command lets you copy files from one location to another. For example, to copy a file names `users.txt` from your current directory to the `Documents directory:`
+
+```bash
+cp users.txt Documents/
+```
+
+To create a copy of a file with a new name in the same directory:
+
+```bash
+cp users.txt copy_users.txt
+```
+
+When you use `cp` you are copying the data (content), but the permissions and ownership usually change to match the person who ran the command.
+
+To copy entire directories (including everything inside them), add the `-r` optin for recursive copying:
+
+```bash
+cp -r source_directory/ destination_directory/
+```
+
+## Moving and renaming files with `mv`
+
+In Linux, moving a file is essentially the same as renaming it. The `mv` command handles both tasks. You can either move a file to a new location, renmae it, or even do goth in one step. For example, to move `requirements.txt` to `/home/user/Documents` you would run:
+
+```bash
+mv requirements.txt /home/user/Documents
+```
+
+To rename a file simply specify the new name as the destination:
+
+```bash
+mv users.txt newfilename.txt
+```
+
+In this case, `users.txt` is renamed to `newfilename.txt` within the same directory.
+
+If you wnat to move and rename the file at the same time, specify the new name along with the destination directory:
+
+```bash
+mv users.txt /home/user/Documents/newfilename.txt
+```
+
+Linux also includes a separate command called `rename`, which is specifically designed for renaming multiple files at once. It is not installed by default on most systems:
+
+```bash
+sudo apt install rename
+```
+
+## Deleting files and directories
+
+The `rm` command is your got-to for deleting files. To remove a file called `olddata` simply run:
+
+```bash
+rm olddata
+```
+Keep in mind: when you delete something with `rm`, it is gone for good. There is not trash bin to recover it from.
+
+For more control, you can use the `-i` option to prompt for confirmation before each deletion:
+
+```bash
+rm -i rm auth.log
+```
+
+If you want to delete a directory that contains files, you will need to user the `-r` option to remove it recursively:
+
+```bash
+rm -r logs/
+```
+
+This command will delete the directory along with all its contents, including any files and subdirectories. If you want to bypass the confirmation prompt you can use the `-f` (force) option:
+
+```bash
+rm -rf old_backups/
+```
+
+Be very careful with this command. It will delete everything inside the directory without asking.
+
+::: {.callout-warning}
+Be extremely cautious when using the `rm -rf` command, especially when targeting the root directory with `rm -rf /*`. This command will forcefully and recursively delete all files and directories starting from the root, effectively wiping your entire system.
+:::
+
+# Linking files: hard links and symbolic links
+
+Linux lets you create links between files, a bit like creating shortcuts in Windows. Instead of having multiple physical copies of the same file, you can keep one copy and create links that point to it. This saves space and makes file management easier.
+
+You will encounter links often in Linux: under `/etc/alternatives`, inside `/var/log` and even at the system level. For example, on modern Linux systems `/bin` is simply a symlink to `/usr/bin`. 
+
+In Linux, there are 2 kinds of links:
+
+- Symbolic links (soft links)
+- Hard links
+
+## Symboling links (soft links)
+
+A symbolic link, also called a soft link, is a file that points to another file or directory. Think of it as a pointer in the filesystem, the link itself doesn not contain the data, it just redirects you to the target.
+
+To create a symbolic link, the target file must already exists. Use the `ln` command with the `-s` option:
+
+```bash
+ln -s <target> <linkname>
+```
+
+For example:
+
+```bash
+lrwxrwxrwx 1 luifrancgom luifrancgom  9 Mar 15 17:34 users_sl.txt -> users.txt
+-rw-rw-r-- 1 luifrancgom luifrancgom 78 Mar 15 17:16 users.txt
+```
+
+Notice the `->` sign, it shows that `users_sl.txt ` points to `users.txt`. The file size also tells a story: `users_sl.txt` is 9 bytes while `users.txt` is 78 bytes.
+
+You can also confirm this by checking the 2 files inodes. Symlinks are separate files with their own inode numbers, which you can see with `ls -i`:
+
+```bash
+ls -i users.txt users_sl.txt
+```
+
+```bash
+35920674 users_sl.txt  35922432 users.txt
+```
+
+## Relative paths in symlinks
+
+When you create a symlink, the target path is interpreted **relative to where the links will live**, not where you run the command from.
+
+## Hard links
+
+A hard link creates an additional name for the same file. Unlike, it does not just point to another file, it actually refers to the same underlying data on disk. That means the 2 names are interchangeable: edit one and the changes show up in the other.
+
+To create a hard link, use `ln` without any options:
+
+```bash
+ln banner.txt banner_hl.txt
+```
+
+You can confirm that hard-linked files are truly the same by checking their node numbers. Use the `-i` option with `ls` to show both the inode and a long listing:
+
+```bash
+ls banner.txt banner_hl.txt
+```
+
+```bash
+35919814 -rw-r--r-- 2 luifrancgom luifrancgom  122 Mar 15 19:53 banner_hl.txt
+35919814 -rw-r--r-- 2 luifrancgom luifrancgom  122 Mar 15 19:53 banner.txt
+```
+
+::: {.callout-warning}
+This behavior is different from symbolic links. If you delete the original file that a symlink points to, the link becomes broken and no longer works. With hard links, the data lives on as long as at least onle link still exists.
+:::
+
+## Linking directories
+
+So far, we have only linked regular files, but what about directories? Here the rules are different:
+
+- **Symbolic links** can point to directories without any problem
+- **Hard links** to directories are generally not allowed for normal users, because the could create loops in the filesystem and confuse tools that traverse directories.
+
+## Removing symlinks
+
+It is important to make sure you are deleting the link itself, not the target file.
+
+There are 2 common ways to remove a symlink:
+
+- Using `unlink` (removes one link at a time):
+
+  ```bash
+  unlink banner_hl.txt  
+  ```
+
+- Using `rm` (can remove one or many links at once):
+
+  ```bash
+  rm banner_hl.txt
+  ```
+
+::: {.callout-caution}
+Be careful not to confuse the symlink with the target. Removing a symlink only deletes the link file itself, it does not delete the original file or directory it points to.
+:::
+
+# Finding help
+
+Linux commands often come with a variety of options and flags, and it is easy to forget the details form time to time.
+
+Most commands support a help flag, `--help`, which gives you a quick summary of how the command works. For example:
+
+```bash
+ls --help
+```
+
+::: {.callout-tip}
+Some commands also support the `-h` option, but not all. With `ls`, for example, `-h` means human-readable file sizes, not help. When in doubt, use `--help` for a quick refresher.
+:::
+
+# Using Man pages
+
+For more detailed information, Linux provides manual pages or man pages for short. These are full reference documents built right into the system.
+
+To read a man page, type `man` followed by the command name:
+
+```bash
+man ls
+```
+
+## Understanding Man Pages
+
+Most man pages follow a predictable structure, with parts like:
+
+- **NAME**: A brief description of the command
+- **SYNOPSIS**: Shows the syntax and available options
+- **DESCRIPTION**: A deeper explanation of what the command does
+- **OPTIONS**: All the flags and switches, with descriptions
+- **EXAMPLES**: Sometimes included to show how to use the command
+- **SEE ALSO**: Related commands and references
+
+### Man Page sections
+
+Man pages are divided into numbered sections based on the type of content. When you run `man <command>`, it usually shows the most common one (usually section 1 for user commands). But you can also specify a section number if needed.
+
+Here are the most commonly used man sections:
+
+| Section | Description |
+| :--- | :--- |
+| **1** | User commands (things you run in the terminal) |
+| **2** | System calls (functions provided by the kernel) |
+| **3** | Library functions (C standard library, etc.) |
+| **4** | Special files (usually in `/dev`) |
+| **5** | File formats and configuration files |
+| **6** | Games and screensavers |
+| **7** | Miscellaneous (macro packages, conventions, etc.) |
+| **8** | System administration commands (usually run as root) |
+
+By defaults man pages defaults to section 1 but you can specify a section manually if needed. For example:
+
+```bash
+man 5 passwd
+```
+
+Also the man command has its own man page. Try running:
+
+```bash
+man man
+```
+
+Another helpful tool is `whatis`, which gives a one-line summary of a command, essentially then **NAME** section of its man page. For example:
+
+```bash
+whatis passwd
+```
+
+```bash
+passwd (1)           - change user password
+passwd (1ssl)        - OpenSSL application commands
+passwd (5)           - the password file
+```
+
+### Searching withing a man page
+
+If you are looking for something specific, press `/` to search. For example, to search for the word "option" in the `ls` man page, press:
+
+```bash
+/option
+```
+
+### Navigating Man Pages
+
+Here are some quick keys you ca use while reading a man page:
+
+- `Arrow keys`: Move up/down by one line
+- `Space bar`: Scroll down one page
+- `b`: Scroll up one page
+- `q`: Quit the man page
+
+Once you are familiar with these shorcuts, man pages become a fast and reliable way to get in-depth help.
+
+# The right way to get help
+
+A good rule of thumb: search locally first, Google last. When you need help with a command, follow this order:
+
+1. Try `command --help`
+2. Use `help command` for built-in shell commands (like `cd`, `export`, `alias`)
+3. Run `whatis command` to see a one-line description of what it does
+4. Read `man command` for the full manual page
+5. Check `info command` for GNU documentation
+6. Search online only as a last resort
+
+Why? Because local documentation always matches your system. A solution you find online might be for DEBIAN when you are running Arch, or for an older version of the software. The man page never lies about what is installed on your machine.
+
+# Advanced file operations
+
+## Using wildcards for bulk operations
+
+In Linux, wildcards are special symbols that represent patterns when working with file names. They are particularly useful when you need to apply an operation to multiple files at once, without having to type each file name individually. The most commonly used wildcard is the asterisk `(*)`, which matches zero or more characters.
+
+::: {.callout-caution}
+Wildcards make bulk operations quick and efficient, but they must be used with caution especially with commands like `rm`, as you could unintentionally delete files you did not mean to.
+:::
