@@ -466,3 +466,11 @@ In Linux, wildcards are special symbols that represent patterns when working wit
 ::: {.callout-caution}
 Wildcards make bulk operations quick and efficient, but they must be used with caution especially with commands like `rm`, as you could unintentionally delete files you did not mean to.
 :::
+
+### More wildcards
+
+The asterisk is the most common wildcard, but it is not the only pattern you ca use:
+
+- `?` (question mark): Matches exactly one character. For example `file?.txt` matches `file1.txt` but not `file12.txt`
+- `[]` (square brackets): Matches any one character inside the brackets. For example, `file[12].txt` matches both `file1.txt` and `file2.txt`
+- `{}` (curly braces): Lets you specify multiple fixed options. For example, `file{1,2}.txt` matches `file1.txt` and `file2.txt`
