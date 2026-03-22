@@ -9,3 +9,179 @@ format:
 ---
 
 # File and directory permissions
+
+Managing files and directories is only part of working with linux. Another essential aspect is permissions and ownership. These define who can read, modify or execute files and directories. Also play a critical role in keeping your system secure.
+
+You will learn how to change these permissions with the chmod command, manage file ownership with chown and chgrp. Also how to use sudo to temporarily elevate privileges for administrative tasks.
+
+I Linux, every file and directory has a set of permissions that determine who can read, write or execute them. These permissions are essential for keeping your system secure, ensuring that only authorized users can interact with your files.
+
+Permissions are represented in 2 formats:
+
+- **Symbolic format**, using letters like `rwx` (read, write, execute)
+- **Numeric format**, based on the values 4, 2 and 1
+
+Lets start by breaking down the symbolic `rwx` format
+
+## The `rwx` notation
+
+- **r (read)**: For files, this allows the contents to be viewed. For directories, it lets users list the files inside
+- **w (write)**: For files, this allows changes to be made. For directories, it lets users create, delete or rename files withing the directory.
+- **x (execute)**: For files, this allows the file to be run as a program or script. For directories, it lers users enter the directory (`cd`) and access its contents.
+
+## User, group and others
+
+Linux classifies file accesss into 3 categories to control who can interact with a file or directory:
+
+- **User (u)**: the owner of the file
+- **Group (u)**: A group of users who share access
+- **Others (o)**: Everyone else on the system who is not the owner and not in the group
+
+Whe you run the `ls -l` command
+
+```
+ls -l /usr/local/bin/uv
+-rwxr-xr-x. 1 root root 54537024 Jan 29 15:02 /usr/local/bin/uv
+```
+
+You see a string like `-rwxr-xr-x.` at the start of the line. This string shows not just the file's permission, but also its type, owner, group and other attributes:
+
+- File type character:
+
+  - `-` regular file
+  - `d` directory
+  - `l` symbolic link
+  - `b` block device
+  - `c` character device
+  - `p` name pipe
+  - `s` socket
+
+- Permission meanings
+
+  - r: read (view contents)
+  - w: write (modify contents)
+  - x: execute (run as a program)
+
+- Security suffix (Alternate access method indicator)
+
+  - ` `: only standard unix permissions apply. No hidden rules. When the character following the file mode bits is a space, there is no alternate access method.  When it is a printing character, then there is such a method.
+  - `.`: SELinux Dot so the file has a SELinux security context but no ACLs. GNU ‘ls’ uses a ‘.’ character to indicate a file with a security context, but no other alternate access method.
+  - `+`: ACL Plus so the file has a Access Control List (ACL) where it might also have SELinux. A file with any other combination of alternate access methods is marked with a ‘+’ character.  
+
+**Note**: Check `info coreutils 'ls invocation'` and the section **What information is listed** 
+
+So lets brake it in the case of `-rwxr-xr-x.`. This means that `/usr/local/bin/uv` is a regular file because of `-`. The next nine characters are grouped into 3 sets, each showing permissions for a different user category:
+
+- **User (owner)**: `rwx` show that the owner can read, write and execute
+- **Group**: `r-x` show that the group can read, not write and execute
+- **Others**: `r-x` show that others can read, not write and execute
+
+Next we have `root root`. The first `root` refers to the owner of the file and the second `root` refers to the group that owns the file. Linux allows to assing both a user and a group to each file. In this case both the owener and the group are `root`
+
+Finally we have `.` so the file has a SELinux security context.
+
+Once you understand what these symbols mean, you can quickly tell who owns a file and what they are allowed to do with it, a crucial part of keeping your system under control and secure.
+
+## Numeric format for permissions
+
+Linux permissions can also be represented using a numeric system. More specifically and **octal** (base-8) system.
+
+Each type of permission is assigned a value:
+
+- 4: read (r)
+- 2: write (w)
+- 1: execute (x)
+
+Add the values together to set the appropiate permissions for each category: user, group and others. For example:
+
+- 7 (4 + 2 + 1): read, write and execute `rwx`
+- 5 (4 + 1): read and execute `r-x`
+- 4: read only `r--`
+
+**Note**: See page 111 and 112 for a table with the most common permissions.
+
+::: {.callout-tip}
+There is no hard rule about whether to use symbolic (`rwx`) or numeric (`755`) format when setting permissions.
+
+Both are valid and widely used, so feel free to choose whichever makes more sense to you.
+:::
+
+## Default permissions and umask
+
+When you create a new file or directory in Linux, it is assigned default permissions automatically. These defaults are controlled by a system setting called `umask`.
+
+The umask (user file-creation mode mask) determines shich permission bits should be turned off by default. It substract permissions from the full set (usually `666` for files and `777` for directories)
+
+- For directories the base is `777` (`rwxrwxrwx`). It starts with execute (`x`) because you need that to enter a folder.
+- For files the base is `666` (`rw-rw-rw`). It starts without execute (`x`) for safety
+
+This means new file will have permissions of `664` (`666 - 002`) so the mask blocks write permission for `others` (`rw-rw-r--`) and new directories will have permissions of `775` (`777 - 002`) so the mask blocks permissions for `others` (`rwxrwxr-x`)
+
+# Chaing permissions
+
+The `chmod` command it the tool you will use to change the permissions of files and directories. Whether you are using the symbolic `rwx` fromat or the numeric `(4, 2, 1)` format.
+
+## Using the symbolic format with chmod
+
+The basic structure of the `chmod` command is:
+
+```
+chmod [who][operation][permissions] filename
+```
+
+Where:
+
+- **who**: specifies the user category: `u` for user (owner), `g` for group, `o` for others and `a` for all (user, group and others)
+- **operation**: use `+` to add a permission, `-` to remove a permission and `=` to set a permission explicitely
+- **permissions**: use `r`, `w` and `x` for read, write and execute.
+
+For example:
+
+```bash
+ls -l scripts.sh
+-rw-rw-r-- 1 traw traw 0 Jan 11 19:45 scripts.sh
+```
+To give the owner (user) permission to execute the file, then:
+
+```bash
+chmod u+x scripts.sh
+```
+
+You can also combine multiple changes in a single command. For example:
+
+```bash
+chmod u+x, g+x scripts.sh
+```
+In that way you give the owner (user) and the group the permission to execute. Also you can use `a+x` to achive `u+x, g+x` and `o+x`. You will often see `chmod +x <filename>` instead of `chmod a+x <filename>`. Both do the same thing.
+
+## Setting permissions explicitely
+
+Instead of adding or removing permissions, you explicitely define which permissions should be active. For example if a file currently has read and write permissions `(rw-)` for the owner, and you want to change it to only have execute permission, you can use `=` to set the permission explicitely:
+
+```bash
+chmod u=x <filename>
+```
+
+This command would remove the existing read and write permissions and leave the owner with just execute permission (`--x`).
+
+This command ensures that the user (owner) has only execute permission `--x`, regardless of whether they had other permissions (like write or execute) before.
+
+In contrast, using `+` or `-` adds or removes permissions without affecting the others that are already set.
+
+The `=` option ensures that only the specified permissions remain, which is it's called setting permissions explicitely.
+
+## Using the numeric format with chmod
+
+Alternatively, you can use the numeric format we discussed earlier. Each set of permissions (user, group and others) is represented by a number (4 for read, 2 for write and 1 for execute). You can add these number together to set specific permissions.
+
+For example to five the owner full permissions (`rwx`), the group read and execute permissions (`r-x`) and others read only access (`r--`) you would run:
+
+```bash
+chmod 754 <filename>
+```
+
+This command sets the permissions as:
+
+- Owner: read, write, execute (7)
+- Group: read, execute (5)
+- Others: read only (4)

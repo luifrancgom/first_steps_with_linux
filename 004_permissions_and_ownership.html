@@ -20,6 +20,41 @@ ul.task-list li input[type="checkbox"] {
 width: 0.8em;
 margin: 0 0.8em 0.2em -1em;  vertical-align: middle;
 }
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+}
+pre.numberSource { margin-left: 3em; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -2172,7 +2207,19 @@ vertical-align: -.125em;
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#file-and-directory-permissions" id="toc-file-and-directory-permissions" class="nav-link active" data-scroll-target="#file-and-directory-permissions"><span class="header-section-number">1</span> File and directory permissions</a></li>
+  <li><a href="#file-and-directory-permissions" id="toc-file-and-directory-permissions" class="nav-link active" data-scroll-target="#file-and-directory-permissions"><span class="header-section-number">1</span> File and directory permissions</a>
+  <ul class="collapse">
+  <li><a href="#the-rwx-notation" id="toc-the-rwx-notation" class="nav-link" data-scroll-target="#the-rwx-notation"><span class="header-section-number">1.1</span> The <code>rwx</code> notation</a></li>
+  <li><a href="#user-group-and-others" id="toc-user-group-and-others" class="nav-link" data-scroll-target="#user-group-and-others"><span class="header-section-number">1.2</span> User, group and others</a></li>
+  <li><a href="#numeric-format-for-permissions" id="toc-numeric-format-for-permissions" class="nav-link" data-scroll-target="#numeric-format-for-permissions"><span class="header-section-number">1.3</span> Numeric format for permissions</a></li>
+  <li><a href="#default-permissions-and-umask" id="toc-default-permissions-and-umask" class="nav-link" data-scroll-target="#default-permissions-and-umask"><span class="header-section-number">1.4</span> Default permissions and umask</a></li>
+  </ul></li>
+  <li><a href="#chaing-permissions" id="toc-chaing-permissions" class="nav-link" data-scroll-target="#chaing-permissions"><span class="header-section-number">2</span> Chaing permissions</a>
+  <ul class="collapse">
+  <li><a href="#using-the-symbolic-format-with-chmod" id="toc-using-the-symbolic-format-with-chmod" class="nav-link" data-scroll-target="#using-the-symbolic-format-with-chmod"><span class="header-section-number">2.1</span> Using the symbolic format with chmod</a></li>
+  <li><a href="#setting-permissions-explicitely" id="toc-setting-permissions-explicitely" class="nav-link" data-scroll-target="#setting-permissions-explicitely"><span class="header-section-number">2.2</span> Setting permissions explicitely</a></li>
+  <li><a href="#using-the-numeric-format-with-chmod" id="toc-using-the-numeric-format-with-chmod" class="nav-link" data-scroll-target="#using-the-numeric-format-with-chmod"><span class="header-section-number">2.3</span> Using the numeric format with chmod</a></li>
+  </ul></li>
   </ul>
 </nav>
 </div>
@@ -2199,6 +2246,155 @@ vertical-align: -.125em;
 
 <section id="file-and-directory-permissions" class="level1" data-number="1">
 <h1 data-number="1"><span class="header-section-number">1</span> File and directory permissions</h1>
+<p>Managing files and directories is only part of working with linux. Another essential aspect is permissions and ownership. These define who can read, modify or execute files and directories. Also play a critical role in keeping your system secure.</p>
+<p>You will learn how to change these permissions with the chmod command, manage file ownership with chown and chgrp. Also how to use sudo to temporarily elevate privileges for administrative tasks.</p>
+<p>I Linux, every file and directory has a set of permissions that determine who can read, write or execute them. These permissions are essential for keeping your system secure, ensuring that only authorized users can interact with your files.</p>
+<p>Permissions are represented in 2 formats:</p>
+<ul>
+<li><strong>Symbolic format</strong>, using letters like <code>rwx</code> (read, write, execute)</li>
+<li><strong>Numeric format</strong>, based on the values 4, 2 and 1</li>
+</ul>
+<p>Lets start by breaking down the symbolic <code>rwx</code> format</p>
+<section id="the-rwx-notation" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="the-rwx-notation"><span class="header-section-number">1.1</span> The <code>rwx</code> notation</h2>
+<ul>
+<li><strong>r (read)</strong>: For files, this allows the contents to be viewed. For directories, it lets users list the files inside</li>
+<li><strong>w (write)</strong>: For files, this allows changes to be made. For directories, it lets users create, delete or rename files withing the directory.</li>
+<li><strong>x (execute)</strong>: For files, this allows the file to be run as a program or script. For directories, it lers users enter the directory (<code>cd</code>) and access its contents.</li>
+</ul>
+</section>
+<section id="user-group-and-others" class="level2" data-number="1.2">
+<h2 data-number="1.2" class="anchored" data-anchor-id="user-group-and-others"><span class="header-section-number">1.2</span> User, group and others</h2>
+<p>Linux classifies file accesss into 3 categories to control who can interact with a file or directory:</p>
+<ul>
+<li><strong>User (u)</strong>: the owner of the file</li>
+<li><strong>Group (u)</strong>: A group of users who share access</li>
+<li><strong>Others (o)</strong>: Everyone else on the system who is not the owner and not in the group</li>
+</ul>
+<p>Whe you run the <code>ls -l</code> command</p>
+<pre><code>ls -l /usr/local/bin/uv
+-rwxr-xr-x. 1 root root 54537024 Jan 29 15:02 /usr/local/bin/uv</code></pre>
+<p>You see a string like <code>-rwxr-xr-x.</code> at the start of the line. This string shows not just the file’s permission, but also its type, owner, group and other attributes:</p>
+<ul>
+<li><p>File type character:</p>
+<ul>
+<li><code>-</code> regular file</li>
+<li><code>d</code> directory</li>
+<li><code>l</code> symbolic link</li>
+<li><code>b</code> block device</li>
+<li><code>c</code> character device</li>
+<li><code>p</code> name pipe</li>
+<li><code>s</code> socket</li>
+</ul></li>
+<li><p>Permission meanings</p>
+<ul>
+<li>r: read (view contents)</li>
+<li>w: write (modify contents)</li>
+<li>x: execute (run as a program)</li>
+</ul></li>
+<li><p>Security suffix (Alternate access method indicator)</p>
+<ul>
+<li><code></code>: only standard unix permissions apply. No hidden rules. When the character following the file mode bits is a space, there is no alternate access method. When it is a printing character, then there is such a method.</li>
+<li><code>.</code>: SELinux Dot so the file has a SELinux security context but no ACLs. GNU ‘ls’ uses a ‘.’ character to indicate a file with a security context, but no other alternate access method.</li>
+<li><code>+</code>: ACL Plus so the file has a Access Control List (ACL) where it might also have SELinux. A file with any other combination of alternate access methods is marked with a ‘+’ character.</li>
+</ul></li>
+</ul>
+<p><strong>Note</strong>: Check <code>info coreutils &#39;ls invocation&#39;</code> and the section <strong>What information is listed</strong></p>
+<p>So lets brake it in the case of <code>-rwxr-xr-x.</code>. This means that <code>/usr/local/bin/uv</code> is a regular file because of <code>-</code>. The next nine characters are grouped into 3 sets, each showing permissions for a different user category:</p>
+<ul>
+<li><strong>User (owner)</strong>: <code>rwx</code> show that the owner can read, write and execute</li>
+<li><strong>Group</strong>: <code>r-x</code> show that the group can read, not write and execute</li>
+<li><strong>Others</strong>: <code>r-x</code> show that others can read, not write and execute</li>
+</ul>
+<p>Next we have <code>root root</code>. The first <code>root</code> refers to the owner of the file and the second <code>root</code> refers to the group that owns the file. Linux allows to assing both a user and a group to each file. In this case both the owener and the group are <code>root</code></p>
+<p>Finally we have <code>.</code> so the file has a SELinux security context.</p>
+<p>Once you understand what these symbols mean, you can quickly tell who owns a file and what they are allowed to do with it, a crucial part of keeping your system under control and secure.</p>
+</section>
+<section id="numeric-format-for-permissions" class="level2" data-number="1.3">
+<h2 data-number="1.3" class="anchored" data-anchor-id="numeric-format-for-permissions"><span class="header-section-number">1.3</span> Numeric format for permissions</h2>
+<p>Linux permissions can also be represented using a numeric system. More specifically and <strong>octal</strong> (base-8) system.</p>
+<p>Each type of permission is assigned a value:</p>
+<ul>
+<li>4: read (r)</li>
+<li>2: write (w)</li>
+<li>1: execute (x)</li>
+</ul>
+<p>Add the values together to set the appropiate permissions for each category: user, group and others. For example:</p>
+<ul>
+<li>7 (4 + 2 + 1): read, write and execute <code>rwx</code></li>
+<li>5 (4 + 1): read and execute <code>r-x</code></li>
+<li>4: read only <code>r--</code></li>
+</ul>
+<p><strong>Note</strong>: See page 111 and 112 for a table with the most common permissions.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>There is no hard rule about whether to use symbolic (<code>rwx</code>) or numeric (<code>755</code>) format when setting permissions.</p>
+<p>Both are valid and widely used, so feel free to choose whichever makes more sense to you.</p>
+</div>
+</div>
+</section>
+<section id="default-permissions-and-umask" class="level2" data-number="1.4">
+<h2 data-number="1.4" class="anchored" data-anchor-id="default-permissions-and-umask"><span class="header-section-number">1.4</span> Default permissions and umask</h2>
+<p>When you create a new file or directory in Linux, it is assigned default permissions automatically. These defaults are controlled by a system setting called <code>umask</code>.</p>
+<p>The umask (user file-creation mode mask) determines shich permission bits should be turned off by default. It substract permissions from the full set (usually <code>666</code> for files and <code>777</code> for directories)</p>
+<ul>
+<li>For directories the base is <code>777</code> (<code>rwxrwxrwx</code>). It starts with execute (<code>x</code>) because you need that to enter a folder.</li>
+<li>For files the base is <code>666</code> (<code>rw-rw-rw</code>). It starts without execute (<code>x</code>) for safety</li>
+</ul>
+<p>This means new file will have permissions of <code>664</code> (<code>666 - 002</code>) so the mask blocks write permission for <code>others</code> (<code>rw-rw-r--</code>) and new directories will have permissions of <code>775</code> (<code>777 - 002</code>) so the mask blocks permissions for <code>others</code> (<code>rwxrwxr-x</code>)</p>
+</section>
+</section>
+<section id="chaing-permissions" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Chaing permissions</h1>
+<p>The <code>chmod</code> command it the tool you will use to change the permissions of files and directories. Whether you are using the symbolic <code>rwx</code> fromat or the numeric <code>(4, 2, 1)</code> format.</p>
+<section id="using-the-symbolic-format-with-chmod" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="using-the-symbolic-format-with-chmod"><span class="header-section-number">2.1</span> Using the symbolic format with chmod</h2>
+<p>The basic structure of the <code>chmod</code> command is:</p>
+<pre><code>chmod [who][operation][permissions] filename</code></pre>
+<p>Where:</p>
+<ul>
+<li><strong>who</strong>: specifies the user category: <code>u</code> for user (owner), <code>g</code> for group, <code>o</code> for others and <code>a</code> for all (user, group and others)</li>
+<li><strong>operation</strong>: use <code>+</code> to add a permission, <code>-</code> to remove a permission and <code>=</code> to set a permission explicitely</li>
+<li><strong>permissions</strong>: use <code>r</code>, <code>w</code> and <code>x</code> for read, write and execute.</li>
+</ul>
+<p>For example:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-l</span> scripts.sh</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">-rw-rw-r--</span> 1 traw traw 0 Jan 11 19:45 scripts.sh</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>To give the owner (user) permission to execute the file, then:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">chmod</span> u+x scripts.sh</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>You can also combine multiple changes in a single command. For example:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">chmod</span> u+x, g+x scripts.sh</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>In that way you give the owner (user) and the group the permission to execute. Also you can use <code>a+x</code> to achive <code>u+x, g+x</code> and <code>o+x</code>. You will often see <code>chmod +x &lt;filename&gt;</code> instead of <code>chmod a+x &lt;filename&gt;</code>. Both do the same thing.</p>
+</section>
+<section id="setting-permissions-explicitely" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="setting-permissions-explicitely"><span class="header-section-number">2.2</span> Setting permissions explicitely</h2>
+<p>Instead of adding or removing permissions, you explicitely define which permissions should be active. For example if a file currently has read and write permissions <code>(rw-)</code> for the owner, and you want to change it to only have execute permission, you can use <code>=</code> to set the permission explicitely:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">chmod</span> u=x <span class="op">&lt;</span>filename<span class="op">&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This command would remove the existing read and write permissions and leave the owner with just execute permission (<code>--x</code>).</p>
+<p>This command ensures that the user (owner) has only execute permission <code>--x</code>, regardless of whether they had other permissions (like write or execute) before.</p>
+<p>In contrast, using <code>+</code> or <code>-</code> adds or removes permissions without affecting the others that are already set.</p>
+<p>The <code>=</code> option ensures that only the specified permissions remain, which is it’s called setting permissions explicitely.</p>
+</section>
+<section id="using-the-numeric-format-with-chmod" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="using-the-numeric-format-with-chmod"><span class="header-section-number">2.3</span> Using the numeric format with chmod</h2>
+<p>Alternatively, you can use the numeric format we discussed earlier. Each set of permissions (user, group and others) is represented by a number (4 for read, 2 for write and 1 for execute). You can add these number together to set specific permissions.</p>
+<p>For example to five the owner full permissions (<code>rwx</code>), the group read and execute permissions (<code>r-x</code>) and others read only access (<code>r--</code>) you would run:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">chmod</span> 754 <span class="op">&lt;</span>filename<span class="op">&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This command sets the permissions as:</p>
+<ul>
+<li>Owner: read, write, execute (7)</li>
+<li>Group: read, execute (5)</li>
+<li>Others: read only (4)</li>
+</ul>
+</section>
 </section>
 
 </main>
