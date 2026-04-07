@@ -185,3 +185,25 @@ This command sets the permissions as:
 - Owner: read, write, execute (7)
 - Group: read, execute (5)
 - Others: read only (4)
+
+### Changing directory permissions
+
+Directory permissions in Linux behave slightly differently from file permissions because they control how users interact with the contents of a directory itself, whether they can enter the directory, list its contents, or modify files inside it.
+
+#### The behavior of Permissions on Directories
+
+- **r (read)**: The `r` permission allows users to list the contents of a directory. However, this doesn't mean they can access or open the files inside it, just they can see the names of files and subdirectories
+
+- **w (write)**: The `w` permission allows users to create, delete, or rename files and subdirectories withing the directory. However, this alone doesn't give them the ability to enter the directory or access the files; they need execute, `x`, permission as well.
+
+- **x (execute)**: The `x` permission is what allows users to **enter** the directory, meaning they can `cd` into it. Without this permission, users can not access the contents of the directory, even if they have read permission.   
+
+These 3 permissions combine to control how users interact with directories:
+
+- A directory with `r-x` permissions lets users list its contents and navigate into it, but they can not add or delete files
+
+- A directory with `rwx` permissions allows users to navigate into it, list its contents and create or delete files inside.
+
+- A directory with `rw-` permissions lets users add and delete files withing the direcotry but does not allow them to navigate into it or list its contents.
+
+#### Modifying directory permissions
