@@ -1,0 +1,10 @@
+---
+title: Advanced file access control
+format:
+  html: 
+    toc: true
+    number-sections: true
+    code-fold: true
+    embed-resources: true
+---
+
