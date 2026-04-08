@@ -2223,6 +2223,18 @@ vertical-align: -.125em;
   <li><a href="#changing-directory-permissions" id="toc-changing-directory-permissions" class="nav-link" data-scroll-target="#changing-directory-permissions"><span class="header-section-number">2.3.1</span> Changing directory permissions</a></li>
   </ul></li>
   </ul></li>
+  <li><a href="#managing-ownership" id="toc-managing-ownership" class="nav-link" data-scroll-target="#managing-ownership"><span class="header-section-number">3</span> Managing ownership</a>
+  <ul class="collapse">
+  <li><a href="#understanding-ownership" id="toc-understanding-ownership" class="nav-link" data-scroll-target="#understanding-ownership"><span class="header-section-number">3.1</span> Understanding ownership</a>
+  <ul class="collapse">
+  <li><a href="#changing-ownership-with-chown" id="toc-changing-ownership-with-chown" class="nav-link" data-scroll-target="#changing-ownership-with-chown"><span class="header-section-number">3.1.1</span> Changing Ownership with <code>chown</code></a></li>
+  <li><a href="#changing-both-user-and-group-ownership" id="toc-changing-both-user-and-group-ownership" class="nav-link" data-scroll-target="#changing-both-user-and-group-ownership"><span class="header-section-number">3.1.2</span> Changing both user and group ownership</a></li>
+  <li><a href="#changing-the-ownership-of-multiple-files" id="toc-changing-the-ownership-of-multiple-files" class="nav-link" data-scroll-target="#changing-the-ownership-of-multiple-files"><span class="header-section-number">3.1.3</span> Changing the ownership of multiple files</a></li>
+  <li><a href="#changing-group-ownership-with-chgrp" id="toc-changing-group-ownership-with-chgrp" class="nav-link" data-scroll-target="#changing-group-ownership-with-chgrp"><span class="header-section-number">3.1.4</span> Changing group ownership with <code>chgrp</code></a></li>
+  <li><a href="#changing-group-ownership-for-multiple-files" id="toc-changing-group-ownership-for-multiple-files" class="nav-link" data-scroll-target="#changing-group-ownership-for-multiple-files"><span class="header-section-number">3.1.5</span> Changing group ownership for multiple files</a></li>
+  <li><a href="#recursive-ownership-changes" id="toc-recursive-ownership-changes" class="nav-link" data-scroll-target="#recursive-ownership-changes"><span class="header-section-number">3.1.6</span> Recursive ownership changes</a></li>
+  </ul></li>
+  </ul></li>
   </ul>
 </nav>
 </div>
@@ -2416,7 +2428,95 @@ Tip
 </section>
 <section id="modifying-directory-permissions" class="level4" data-number="2.3.1.2">
 <h4 data-number="2.3.1.2" class="anchored" data-anchor-id="modifying-directory-permissions"><span class="header-section-number">2.3.1.2</span> Modifying directory permissions</h4>
+<p>you can modify directory permissions just as you would with files. For example, to allow users to traverse a directory (enter it) but not modify its contents, you can add the execuse permission:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">chmod</span> +x <span class="op">&lt;</span>directory_name<span class="op">&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This command makes the directory accessible, allowing users to navigate into it using <code>cd</code>, but they won’t be able to list the contents without the read permission (<code>r</code>).</p>
 </section>
+<section id="apllying-changes-recursively" class="level4" data-number="2.3.1.3">
+<h4 data-number="2.3.1.3" class="anchored" data-anchor-id="apllying-changes-recursively"><span class="header-section-number">2.3.1.3</span> Apllying changes recursively</h4>
+<p>If you want to modify permissions for a directory and all its subdirectories and files, you can use the <code>-R</code> option (recursive):</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">chmod</span> <span class="at">-R</span> 755 <span class="op">&lt;</span>directory_name<span class="op">&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This command will apply the <code>755</code> permissions to the directory and everything inside it. The <code>755</code> permission gives the owner full acess to the directory (read, write, execute) while giving others read and execute permissions but not write access.</p>
+<div class="callout callout-style-default callout-caution callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Caution
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Avoid running <code>chmod -R 777</code> on directories especially system directories, web roots or shared project directories.</p>
+</div>
+</div>
+<p>Setting permissions to <code>777</code> gives <strong>everyone</strong> (including unauthorized users or processes) full control to read, write and execute files. This can expose sensitive data, allow tampering, or enable malicious code execution.</p>
+<p>Instead of making everything universally accessible, consider which users actually need access and apply more specific permissions like <code>755</code> or <code>750</code> for directories and <code>644</code> or <code>640</code> for files.</p>
+</section>
+</section>
+</section>
+</section>
+<section id="managing-ownership" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Managing ownership</h1>
+<p>Every file and directory on a Linux system has both an owner and an associated group. Ownership plays a key role in determining who can access or modify a file. especially in evironments where multiple users share the same system.</p>
+<section id="understanding-ownership" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="understanding-ownership"><span class="header-section-number">3.1</span> Understanding ownership</h2>
+<p>Each file has 2 types of ownership:</p>
+<ol type="1">
+<li><p><strong>User (Owner)</strong>: The person who created the file. By default, this user has permission to read, write or execute it.</p></li>
+<li><p><strong>Group</strong>: A group of users who may also have access to the file, depending on how group permissions are set.</p></li>
+</ol>
+<p>As you have see, when you list fiels with <code>ls -l</code>, you will see both the user and group names:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">drwxrwxr-x+</span> 4 luis.gomezl luis.gomezl 4096 Apr  4 11:36 marketing_report_project_1</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>In this example, the first <code>luis.gomezl</code> is the owner, and the second <code>luis.gomezl</code> is the group. You can change either (or both) using the <code>chown</code> command.</p>
+<section id="changing-ownership-with-chown" class="level3" data-number="3.1.1">
+<h3 data-number="3.1.1" class="anchored" data-anchor-id="changing-ownership-with-chown"><span class="header-section-number">3.1.1</span> Changing Ownership with <code>chown</code></h3>
+<p>The <code>chown</code> command lets you change the user who owns a file or directory. Here is the basi syntax:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chown <span class="op">&lt;</span>new_owner<span class="op">&gt;</span> <span class="op">&lt;</span>filename<span class="op">&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>For example, to transfer ownership of <code>hello.txt</code> from <code>traw</code> to <code>john</code> you would run:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chown john hello.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This command changes the owner of <code>hello.txt</code> to <code>john</code> while keeping the group ownership the same.</p>
+</section>
+<section id="changing-both-user-and-group-ownership" class="level3" data-number="3.1.2">
+<h3 data-number="3.1.2" class="anchored" data-anchor-id="changing-both-user-and-group-ownership"><span class="header-section-number">3.1.2</span> Changing both user and group ownership</h3>
+<p>In some cases, you might need to change both the user and group ownership at the same time. With <code>chown</code>, this is straighforward. You specify both the new owner and the new group by separating them with a colon:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chown new_owner:new_group filename</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>For example, if you want to change the owner of <code>hello.txt</code> to <code>john</code> and the group <code>dev</code>, you would run:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chown john:dev hello.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This command changes the owner to <code>john</code> and the group to <code>dev</code>.</p>
+</section>
+<section id="changing-the-ownership-of-multiple-files" class="level3" data-number="3.1.3">
+<h3 data-number="3.1.3" class="anchored" data-anchor-id="changing-the-ownership-of-multiple-files"><span class="header-section-number">3.1.3</span> Changing the ownership of multiple files</h3>
+<p>You can apply <code>chown</code> to multiple files at once. For example, to change the ownership of all <code>.txt</code> files in the current directory to <code>john</code> you can use:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chown john <span class="pp">*</span>.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This command changes the owner of all fiels with a <code>.txt</code> extension to <code>john</code>.</p>
+<p>In relation to the scope of the command it applies to the current directory but not for subdirectories and definitely not for the entire operating system.</p>
+<p>If you are for example in <code>/home/luis.gomezl</code> this command would change your files, but it would leave the system files in <code>/etc</code> or <code>/usr/bin</code> completely untouched.</p>
+</section>
+<section id="changing-group-ownership-with-chgrp" class="level3" data-number="3.1.4">
+<h3 data-number="3.1.4" class="anchored" data-anchor-id="changing-group-ownership-with-chgrp"><span class="header-section-number">3.1.4</span> Changing group ownership with <code>chgrp</code></h3>
+<p>If you only need to change the group ownership of a file, you can use the <code>chgrp</code> command. The syntax is simple:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chgrp new_group filename</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>For example, to change the group of <code>hello.txt</code> to <code>admin</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chgrp admin hello.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This command changes only the group ownership, leaving the user ownership unchanged.</p>
+</section>
+<section id="changing-group-ownership-for-multiple-files" class="level3" data-number="3.1.5">
+<h3 data-number="3.1.5" class="anchored" data-anchor-id="changing-group-ownership-for-multiple-files"><span class="header-section-number">3.1.5</span> Changing group ownership for multiple files</h3>
+<p>Like <code>chown</code>, you can also change the group ownership for multiple files in one go. To change the group for all <code>.log</code> files in a directory to <code>admin</code>, you could run:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chgrp admin <span class="pp">*</span>.log</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This applies the new group ownership to all files that match the <code>.log</code> extension in the current directory.</p>
+</section>
+<section id="recursive-ownership-changes" class="level3" data-number="3.1.6">
+<h3 data-number="3.1.6" class="anchored" data-anchor-id="recursive-ownership-changes"><span class="header-section-number">3.1.6</span> Recursive ownership changes</h3>
+<p>Both <code>chown</code> and <code>chgrp</code> allow you to apply ownership changes to a directory and all of its contents (file and subdirectories) using <code>-R</code> (recursive) option.</p>
+<p>This is especially useful when you need to change the ownership of multiple files and subdirectories at one, rather than doing it one by one.</p>
+<p>For example, to change the owner of an entrie directory and everything inside it to <code>john</code> and the group to <code>dev</code>, you would run:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chown <span class="at">-R</span> john:dev /backups/projects</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Similarly you can use:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chgrp <span class="at">-R</span> sysadmin /backups</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This command changes the group of the directory and all of tis contents to <code>admin</code>.</p>
+<p><strong>Note</strong>: The acronym of <code>chown</code> is <strong>Ch</strong>ange <strong>Own</strong>er</p>
 </section>
 </section>
 </section>

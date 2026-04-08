@@ -207,3 +207,142 @@ These 3 permissions combine to control how users interact with directories:
 - A directory with `rw-` permissions lets users add and delete files withing the direcotry but does not allow them to navigate into it or list its contents.
 
 #### Modifying directory permissions
+
+you can modify directory permissions just as you would with files. For example, to allow users to traverse a directory (enter it) but not modify its contents, you can add the execuse permission:
+
+```bash
+chmod +x <directory_name>
+```
+
+This command makes the directory accessible, allowing users to navigate into it using `cd`, but they won't be able to list the contents without the read permission (`r`).
+
+#### Apllying changes recursively
+
+If you want to modify permissions for a directory and all its subdirectories and files, you can use the `-R` option (recursive):
+
+```bash
+chmod -R 755 <directory_name>
+```
+
+This command will apply the `755` permissions to the directory and everything inside it. The `755` permission gives the owner full acess to the directory (read, write, execute) while giving others read and execute permissions but not write access.
+
+::: {.callout-caution}
+Avoid running `chmod -R 777` on directories especially system directories, web roots or shared project directories.
+:::
+
+Setting permissions to `777` gives **everyone** (including unauthorized users or processes) full control to read, write and execute files. This can expose sensitive data, allow tampering, or enable malicious code execution.
+
+Instead of making everything universally accessible, consider which users actually need access and apply more specific permissions like `755` or `750` for directories and `644` or `640` for files.
+
+# Managing ownership
+
+Every file and directory on a Linux system has both an owner and an associated group. Ownership plays a key role in determining who can access or modify a file. especially in evironments where multiple users share the same system.
+
+## Understanding ownership
+
+Each file has 2 types of ownership:
+
+1. **User (Owner)**: The person who created the file. By default, this user has permission to read, write or execute it.
+
+2. **Group**: A group of users who may also have access to the file, depending on how group permissions are set.
+
+As you have see, when you list fiels with `ls -l`, you will see both the user and group names:
+
+```bash
+drwxrwxr-x+ 4 luis.gomezl luis.gomezl 4096 Apr  4 11:36 marketing_report_project_1
+```
+In this example, the first `luis.gomezl` is the owner, and the second `luis.gomezl` is the group. You can change either (or both) using the `chown` command.
+
+### Changing Ownership with `chown`
+
+The `chown` command lets you change the user who owns a file or directory. Here is the basi syntax:
+
+```bash
+sudo chown <new_owner> <filename>
+```
+
+For example, to transfer ownership of `hello.txt` from `traw` to `john` you would run:
+
+```bash
+sudo chown john hello.txt
+```
+
+This command changes the owner of `hello.txt` to `john` while keeping the group ownership the same.
+
+### Changing both user and group ownership
+
+In some cases, you might need to change both the user and group ownership at the same time. With `chown`, this is straighforward. You specify both the new owner and the new group by separating them with a colon:
+
+```bash
+sudo chown new_owner:new_group filename
+```
+
+For example, if you want to change the owner of `hello.txt` to `john` and the group `dev`, you would run:
+
+```bash
+sudo chown john:dev hello.txt
+```
+
+This command changes the owner to `john` and the group to `dev`.
+
+### Changing the ownership of multiple files
+
+You can apply `chown` to multiple files at once. For example, to change the ownership of all `.txt` files in the current directory to `john` you can use:
+
+```bash
+sudo chown john *.txt
+```
+
+This command changes the owner of all fiels with a `.txt` extension to `john`.
+
+In relation to the scope of the command it applies to the current directory but not for subdirectories and definitely not for the entire operating system.
+
+If you are for example in `/home/luis.gomezl` this command would change your files, but it would leave the system files in `/etc` or `/usr/bin` completely untouched.
+
+### Changing group ownership with `chgrp`
+
+If you only need to change the group ownership of a file, you can use the `chgrp` command. The syntax is simple:
+
+```bash 
+sudo chgrp new_group filename
+```
+
+For example, to change the group of `hello.txt` to `admin`:
+
+```bash
+sudo chgrp admin hello.txt
+```
+
+This command changes only the group ownership, leaving the user ownership unchanged.
+
+### Changing group ownership for multiple files
+
+Like `chown`, you can also change the group ownership for multiple files in one go. To change the group for all `.log` files in a directory to `admin`, you could run:
+
+```bash
+sudo chgrp admin *.log
+```
+
+This applies the new group ownership to all files that match the `.log` extension in the current directory.
+
+### Recursive ownership changes
+
+Both `chown` and `chgrp` allow you to apply ownership changes to a directory and all of its contents (file and subdirectories) using `-R` (recursive) option. 
+
+This is especially useful when you need to change the ownership of multiple files and subdirectories at one, rather than doing it one by one.
+
+For example, to change the owner of an entrie directory and everything inside it to `john` and the group to `dev`, you would run:
+
+```bash
+sudo chown -R john:dev /backups/projects
+```
+
+Similarly you can use:
+
+```bash
+sudo chgrp -R sysadmin /backups
+```
+
+This command changes the group of the directory and all of tis contents to `admin`.
+
+**Note**: The acronym of `chown` is **Ch**ange **Own**er
