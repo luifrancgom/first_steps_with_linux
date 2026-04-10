@@ -8,3 +8,24 @@ format:
     embed-resources: true
 ---
 
+Up to this point, you have worked with standard Linux permissions using the familiar `rwx` model. That is more then enough for most everyday tasks, but sometimes you need a bit more control.
+
+In this chapter, you will learn SUID, SGID, the sticky bit, ACLs, and file attributes, and when to use each one.
+
+# Beyond Standard Permissions?
+
+Standard `rwx` permissions work well for most file and directory access needs. But sometimes, you need more than just read, write or execute, you need to control how a file behaves when it runs, or manage how users interact in share directories.
+
+Linux gives you 3 special permission types that extend the basic model:
+
+- Set User ID (SUID)
+- Set Group ID (SGID)
+- Sticky bit
+
+These are known as special permissions, and they are used in very specific situations where standard permissions fall short.
+
+Here is what they do:
+
+- **SUID**:
+- **SGID**: 
+- **Sticky bit**: 

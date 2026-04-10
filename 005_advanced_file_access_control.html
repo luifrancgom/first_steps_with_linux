@@ -2167,8 +2167,14 @@ vertical-align: -.125em;
 <body class="quarto-light">
 
 <div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
-<div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-  
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#beyond-standard-permissions" id="toc-beyond-standard-permissions" class="nav-link active" data-scroll-target="#beyond-standard-permissions"><span class="header-section-number">1</span> Beyond Standard Permissions?</a></li>
+  </ul>
+</nav>
 </div>
 <main class="content" id="quarto-document-content">
 
@@ -2191,7 +2197,25 @@ vertical-align: -.125em;
 </header>
 
 
-
+<p>Up to this point, you have worked with standard Linux permissions using the familiar <code>rwx</code> model. That is more then enough for most everyday tasks, but sometimes you need a bit more control.</p>
+<p>In this chapter, you will learn SUID, SGID, the sticky bit, ACLs, and file attributes, and when to use each one.</p>
+<section id="beyond-standard-permissions" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Beyond Standard Permissions?</h1>
+<p>Standard <code>rwx</code> permissions work well for most file and directory access needs. But sometimes, you need more than just read, write or execute, you need to control how a file behaves when it runs, or manage how users interact in share directories.</p>
+<p>Linux gives you 3 special permission types that extend the basic model:</p>
+<ul>
+<li>Set User ID (SUID)</li>
+<li>Set Group ID (SGID)</li>
+<li>Sticky bit</li>
+</ul>
+<p>These are known as special permissions, and they are used in very specific situations where standard permissions fall short.</p>
+<p>Here is what they do:</p>
+<ul>
+<li><strong>SUID</strong>:</li>
+<li><strong>SGID</strong>:</li>
+<li><strong>Sticky bit</strong>:</li>
+</ul>
+</section>
 
 </main>
 <!-- /main column -->
