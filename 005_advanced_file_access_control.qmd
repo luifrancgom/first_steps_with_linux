@@ -26,6 +26,94 @@ These are known as special permissions, and they are used in very specific situa
 
 Here is what they do:
 
-- **SUID**:
-- **SGID**: 
-- **Sticky bit**: 
+- **SUID**: lets a program run with the permissions of a the file's owner
+- **SGID**: makes sure files created in a shared directory inherit the directory group
+- **Sticky bit**: prevents users from deleting each other's files in public directories like `/tmp`
+
+These permissions are most commonly used in shared environments or for system tools that need elevated priviliges
+
+## SUID (Set User ID)
+
+The Set User ID (SUID) permission is used on executable files. When a file has the SUID bit set, it runds with the permissions of the file's owner, nt the user who launched it.
+
+This is useful when a program needs elevated privileges to do its job, even if it is run by a regular user.
+
+For example, take the `passwd` command, for example. It lets users change their own passwords, but the actual password data is stored in `/etc/shadow`, a file that only `root` can modifiy
+
+It works because `/usr/bin/passwd` has the **SUID bit** set and is owned by `root`. That means when you run the command, it temporarily runs with `root` privileges, just long enough to make the requiered changes.
+
+```bash
+ls -l /usr/bin/passwd
+```
+
+Notice the `s` in the owner's permission field: `rws` instead of `rwx`. The lowercase `s` means the SUID bit is set and the file is executable.
+
+```bash
+-rwsr-xr-x. 1 root root 91424 Nov  3  2024 /usr/bin/passw
+```
+
+If the file was not executable you would see a capital `S` instead.
+
+### Setting the SUID Bit
+
+To set the SUID bit on a file you own (or have permission to modify), use:
+
+```bash
+chmod u+s filename
+```
+To remove it:
+
+```bash
+chmod u-s filename
+```
+
+You can also use numeric mode. The SUID bit has a value of 4 in the special permission slot, so:
+
+```bash
+chmod 4755 <filename>
+```
+
+This sets SUID along with `rwxr-xr-x` permissions
+
+::: {.callout-caution}
+SUID should be used carefully. A vulnerable SUID binary can be abused to gain elevated access.
+
+Avoid setting SUID on scripts or on files in shared directories. Stick to well-audited system tools, and always double-check ownership and permissions before applying SUID manually.
+:::
+
+## SGID (Set Group ID)
+
+The Set Group ID (SGID) permission behaves differently depending on whether it is applied to a file or a directory.
+
+### SGID on executable files
+
+When SGID is set on an executable file, the program runs with the **group** of the file, rather that the group of the user running it.
+
+This is similar to SUID, but it affects group permissions instead of user permissions.
+
+### SGID on Directories
+
+This is where SGID is most useful. When applied to a directory, it ensures that **all files and subdirectories created inside the group ownership of the directory**, not the user's primary group.
+
+That means if you have set up a shared directory for a team, everyone's files will stay under the same group so you don't need to manually adjust group wonership every time.
+
+Let's say you team uses a shared directory at `srv/projects`, and it is owned by a group called `devteam`. You want anything created inside that directory (files, folders, scripts) to automatically blong to the `devteam` group, no matter who creates it.
+
+To make that happen, you can set the SGID bit on the directory:
+
+```bash
+chmod g+s /srv/projects
+```
+After running that command, you will notice an `s` in place of the group's execute bit:
+
+```bash
+ls -ld /srv/projects
+```
+
+Like this:
+
+```bash
+drwxr-sr-x 2 user devteam 4096 May 21 14:12 projects
+```
+
+**Note**: If it is not installed in Oracle Linux 10 installed with `sudo dnf install acl` so you can check the hidden groups. In this way you can use **ACLs (Access Control Lists)**

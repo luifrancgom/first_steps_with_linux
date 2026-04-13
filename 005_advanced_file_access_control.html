@@ -20,6 +20,41 @@ ul.task-list li input[type="checkbox"] {
 width: 0.8em;
 margin: 0 0.8em 0.2em -1em;  vertical-align: middle;
 }
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+}
+pre.numberSource { margin-left: 3em; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -2172,7 +2207,18 @@ vertical-align: -.125em;
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#beyond-standard-permissions" id="toc-beyond-standard-permissions" class="nav-link active" data-scroll-target="#beyond-standard-permissions"><span class="header-section-number">1</span> Beyond Standard Permissions?</a></li>
+  <li><a href="#beyond-standard-permissions" id="toc-beyond-standard-permissions" class="nav-link active" data-scroll-target="#beyond-standard-permissions"><span class="header-section-number">1</span> Beyond Standard Permissions?</a>
+  <ul class="collapse">
+  <li><a href="#suid-set-user-id" id="toc-suid-set-user-id" class="nav-link" data-scroll-target="#suid-set-user-id"><span class="header-section-number">1.1</span> SUID (Set User ID)</a>
+  <ul class="collapse">
+  <li><a href="#setting-the-suid-bit" id="toc-setting-the-suid-bit" class="nav-link" data-scroll-target="#setting-the-suid-bit"><span class="header-section-number">1.1.1</span> Setting the SUID Bit</a></li>
+  </ul></li>
+  <li><a href="#sgid-set-group-id" id="toc-sgid-set-group-id" class="nav-link" data-scroll-target="#sgid-set-group-id"><span class="header-section-number">1.2</span> SGID (Set Group ID)</a>
+  <ul class="collapse">
+  <li><a href="#sgid-on-executable-files" id="toc-sgid-on-executable-files" class="nav-link" data-scroll-target="#sgid-on-executable-files"><span class="header-section-number">1.2.1</span> SGID on executable files</a></li>
+  <li><a href="#sgid-on-directories" id="toc-sgid-on-directories" class="nav-link" data-scroll-target="#sgid-on-directories"><span class="header-section-number">1.2.2</span> SGID on Directories</a></li>
+  </ul></li>
+  </ul></li>
   </ul>
 </nav>
 </div>
@@ -2211,10 +2257,68 @@ vertical-align: -.125em;
 <p>These are known as special permissions, and they are used in very specific situations where standard permissions fall short.</p>
 <p>Here is what they do:</p>
 <ul>
-<li><strong>SUID</strong>:</li>
-<li><strong>SGID</strong>:</li>
-<li><strong>Sticky bit</strong>:</li>
+<li><strong>SUID</strong>: lets a program run with the permissions of a the file’s owner</li>
+<li><strong>SGID</strong>: makes sure files created in a shared directory inherit the directory group</li>
+<li><strong>Sticky bit</strong>: prevents users from deleting each other’s files in public directories like <code>/tmp</code></li>
 </ul>
+<p>These permissions are most commonly used in shared environments or for system tools that need elevated priviliges</p>
+<section id="suid-set-user-id" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="suid-set-user-id"><span class="header-section-number">1.1</span> SUID (Set User ID)</h2>
+<p>The Set User ID (SUID) permission is used on executable files. When a file has the SUID bit set, it runds with the permissions of the file’s owner, nt the user who launched it.</p>
+<p>This is useful when a program needs elevated privileges to do its job, even if it is run by a regular user.</p>
+<p>For example, take the <code>passwd</code> command, for example. It lets users change their own passwords, but the actual password data is stored in <code>/etc/shadow</code>, a file that only <code>root</code> can modifiy</p>
+<p>It works because <code>/usr/bin/passwd</code> has the <strong>SUID bit</strong> set and is owned by <code>root</code>. That means when you run the command, it temporarily runs with <code>root</code> privileges, just long enough to make the requiered changes.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-l</span> /usr/bin/passwd</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Notice the <code>s</code> in the owner’s permission field: <code>rws</code> instead of <code>rwx</code>. The lowercase <code>s</code> means the SUID bit is set and the file is executable.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">-rwsr-xr-x.</span> 1 root root 91424 Nov  3  2024 /usr/bin/passw</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>If the file was not executable you would see a capital <code>S</code> instead.</p>
+<section id="setting-the-suid-bit" class="level3" data-number="1.1.1">
+<h3 data-number="1.1.1" class="anchored" data-anchor-id="setting-the-suid-bit"><span class="header-section-number">1.1.1</span> Setting the SUID Bit</h3>
+<p>To set the SUID bit on a file you own (or have permission to modify), use:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">chmod</span> u+s filename</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>To remove it:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">chmod</span> u-s filename</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>You can also use numeric mode. The SUID bit has a value of 4 in the special permission slot, so:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">chmod</span> 4755 <span class="op">&lt;</span>filename<span class="op">&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This sets SUID along with <code>rwxr-xr-x</code> permissions</p>
+<div class="callout callout-style-default callout-caution callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Caution
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>SUID should be used carefully. A vulnerable SUID binary can be abused to gain elevated access.</p>
+<p>Avoid setting SUID on scripts or on files in shared directories. Stick to well-audited system tools, and always double-check ownership and permissions before applying SUID manually.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="sgid-set-group-id" class="level2" data-number="1.2">
+<h2 data-number="1.2" class="anchored" data-anchor-id="sgid-set-group-id"><span class="header-section-number">1.2</span> SGID (Set Group ID)</h2>
+<p>The Set Group ID (SGID) permission behaves differently depending on whether it is applied to a file or a directory.</p>
+<section id="sgid-on-executable-files" class="level3" data-number="1.2.1">
+<h3 data-number="1.2.1" class="anchored" data-anchor-id="sgid-on-executable-files"><span class="header-section-number">1.2.1</span> SGID on executable files</h3>
+<p>When SGID is set on an executable file, the program runs with the <strong>group</strong> of the file, rather that the group of the user running it.</p>
+<p>This is similar to SUID, but it affects group permissions instead of user permissions.</p>
+</section>
+<section id="sgid-on-directories" class="level3" data-number="1.2.2">
+<h3 data-number="1.2.2" class="anchored" data-anchor-id="sgid-on-directories"><span class="header-section-number">1.2.2</span> SGID on Directories</h3>
+<p>This is where SGID is most useful. When applied to a directory, it ensures that <strong>all files and subdirectories created inside the group ownership of the directory</strong>, not the user’s primary group.</p>
+<p>That means if you have set up a shared directory for a team, everyone’s files will stay under the same group so you don’t need to manually adjust group wonership every time.</p>
+<p>Let’s say you team uses a shared directory at <code>srv/projects</code>, and it is owned by a group called <code>devteam</code>. You want anything created inside that directory (files, folders, scripts) to automatically blong to the <code>devteam</code> group, no matter who creates it.</p>
+<p>To make that happen, you can set the SGID bit on the directory:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">chmod</span> g+s /srv/projects</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>After running that command, you will notice an <code>s</code> in place of the group’s execute bit:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-ld</span> /srv/projects</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Like this:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">drwxr-sr-x</span> 2 user devteam 4096 May 21 14:12 projects</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Note</strong>: If it is not installed in Oracle Linux 10 installed with <code>sudo dnf install acl</code> so you can check the hidden groups. In this way you can use <strong>ACLs (Access Control Lists)</strong></p>
+</section>
+</section>
 </section>
 
 </main>
