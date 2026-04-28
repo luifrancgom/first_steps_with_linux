@@ -116,4 +116,123 @@ Like this:
 drwxr-sr-x 2 user devteam 4096 May 21 14:12 projects
 ```
 
-**Note**: If it is not installed in Oracle Linux 10 installed with `sudo dnf install acl` so you can check the hidden groups. In this way you can use **ACLs (Access Control Lists)**
+**Note**: If it is not installed in Oracle Linux 10 installed with `sudo dnf install acl` so you can check the hidden groups. In this way you can use **ACLs (Access Control Lists)**. In this way you can assign access levels to different groups and not only just one.
+
+### Removing SGID
+
+To remove the SGID bit from the directory:
+
+```bash
+chmod g-s /srv/projects
+```
+
+You can also set or remove SGID using numeric mode. The value for SGID is `2`, and it goes in the special permission slot (the first digit):
+
+```bash
+chmod 2755 /srv/projects
+```
+
+This sets SGID while keeping the rest of the permissions at `rwxr-xr-x`.
+
+## The Sticky Bit
+
+The sticky bit is used in directories to control file deletion in share spaces. When it is set, users can only delete or rename files they own, even if the directory is writable by everyone. 
+
+### A closer look at `/tmp`
+
+The `/tmp` directory is writable by all users and used to store temporary files. But you don't want users interfering with each other's files, so the sticky bit is set to prevent that.
+
+You can check with:
+
+```bash
+ls -ld /tmp
+```
+
+```bash
+drwxrwxrwt. 401 root root 45056 Apr 28 11:48 /tmp
+```
+
+The Sticky Bit permission is specify with a `t` in the "others" section
+
+### Setting the Sticky Bit
+
+To set in on a directory:
+
+```bash
+chmod +t dirname
+```
+
+To remove it:
+
+```bash
+chmod -t dirname
+```
+
+You cna also use numeric mode. The sticky bit has a value of `1` in the special permission slot:
+
+```bash
+chmod 1755 dirname
+```
+
+This sets the sticky bit while keeping regular permissions at `rwxr-xr-x`.
+
+### When it is useful
+
+The sticky bit is ideal for share directories where multiple users have write access, but should only be able to delete their own files. Besides `/tmp`, you will also see it used in group project spaces, shared classrooms or collaborative development enfironments.
+
+## Additional notes
+
+You can use `stat` command to see permissions in their numerical (octal) format (e.g., 755 or 644) rather than just the symbolic `-rwxr-xr-x`. 
+
+```bash
+stat marketing_r
+```
+
+```bash
+  File: marketing_r
+  Size: 4096      	Blocks: 8          IO Block: 4096   directory
+Device: 252,5	Inode: 62915522    Links: 11
+Access: (0755/drwxr-xr-x)  Uid: ( 1002/luis.gomezl)   Gid: ( 1002/luis.gomezl)
+Context: system_u:object_r:user_home_t:s0
+Access: 2026-04-28 12:05:41.270566977 -0500
+Modify: 2026-04-21 19:04:38.143964096 -0500
+Change: 2026-04-21 19:04:38.143964096 -0500
+ Birth: 2026-04-04 10:52:43.039342184 -0500
+```
+In this case for this folder (`marketing_r`) there is no special permission. If there is a permission we have:
+
+- 4 = SUID
+- 2 = SGID
+- 1 Sticky bit
+
+A common security check is to list files with SUID, SGID or sticky bits set and review whether each one is expected.
+
+- To search for files with SUID, run:
+
+```bash
+find / -perm /4000
+```
+
+- To search for files with SGID, run:
+
+```bash
+find / -perm /2000
+```
+
+- To search for files that have either SUID or SGID, run:
+
+```bash
+find / -perm /6000
+```
+
+To find files with the sticky bit:
+
+```bash
+find / -perm /1000
+```
+
+# Access Control Lists (ACLs)
+
+Standard Linux permissions using the `rwx` model work well in most situations, but they have a key limitation: you cna only assign permissions to **one user** (the owner) and **one group**. That might be enough for simple setups, but what if you need to give access to **multiple users** who are not in the same group?
+
+That is where Access Control Lists (ACLs) come in.
